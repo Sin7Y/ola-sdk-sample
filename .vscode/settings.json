@@ -1,0 +1,11 @@
+{
+  "i18n-ally.localesPaths": ["locales"],
+  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.keystyle": "nested",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "css.customData": [".vscode/tailwind.json"],
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
+}

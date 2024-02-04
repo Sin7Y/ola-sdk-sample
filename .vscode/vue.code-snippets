@@ -1,0 +1,31 @@
+{
+  "Vue3 SFC setup": {
+    "prefix": "vue3",
+    "body": [
+      "<template>",
+      "\t<div></div>",
+      "</template>",
+      "",
+      "<script setup lang=\"ts\"></script>",
+      "",
+      "<style></style>",
+      ""
+    ]
+  },
+  "Pinia accountStore": {
+    "prefix": "pinia-account",
+    "body": [
+      "export const useAccountStore = defineStore('account', {",
+      "\tstate: () => ({",
+      "\t\taccount: ''",
+      "\t}),",
+      "\tgetters: {},",
+      "\tactions: {",
+      "\t\tsetAccount(account: string) {",
+      "\t\t\tthis.account = account",
+      "\t\t}",
+      "\t}",
+      "})"
+    ]
+  }
+}
