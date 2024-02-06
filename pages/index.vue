@@ -39,67 +39,94 @@ async function loadAbiWasm(wasmFileUrl: string) {
   }
 }
 
+async function setPubkey(olaWallet: OlaWallet) {
+  // This can only be called once for each account.
+  try {
+    const setKeyHash = await olaWallet.setPubKey();
+    console.log("setKeyHash: ", setKeyHash);
+  } catch (error) {
+    console.log("error: ", error);
+  }
+}
+
+async function getPubkey(olaWallet: OlaWallet) {
+  const aa = "0x0000000000000000000000000000000000000000000000000000000000008006";
+  const params = [
+    {Address: Array.from(OlaAddress.toBigintArray(olaWallet.address))}
+  ];
+  const abi = [
+    {
+      "name": "getPubkey",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "fields"
+        }
+      ]
+    }
+  ];
+  let result = await olaWallet.call<string>(abi, "getPubkey(address)", aa, params);
+  console.log("pubkey result:", result);
+}
+
+async function createProposal(olaWallet: OlaWallet, abi: any, contract: string) {
+  const _contentHash = new Uint8Array(32);
+  _contentHash.fill(6);
+  const _deadline = 2234567890;
+  const _votingType = 0;
+  const _proposalType = 1;
+  
+  const params = [
+    {Hash: Array.from(_contentHash)},
+    {U32: _deadline},
+    {U32: _votingType},
+    {U32: _proposalType}
+  ];
+  console.log("params: ", params);
+  try {
+    const txHash = await olaWallet.invoke(abi, "createProposal(hash,u32,u32,u32)", contract, params);
+    console.log("invoke txHash", txHash);
+  } catch (error) {
+    console.log("error:", error);
+  }
+}
+
+async function getProposalsByOwner(olaWallet: OlaWallet, abi: any, contract: string) {
+  const params = [
+      {Address: Array.from(OlaAddress.toBigintArray(olaWallet.address))}
+    ];
+    try {
+      const ret = await olaWallet.call(abi, "getProposalsByOwner(address)", contract, params);
+      console.log("getProposalsByOwner call result", ret);
+    } catch (error) {
+      console.log("error:", error);
+    }
+}
+
+async function getProposal(olaWallet: OlaWallet, abi: any, contract: string) {
+  const _contentHash = new Uint8Array(32);
+  _contentHash.fill(6);
+  const params = [
+      {Hash: Array.from(_contentHash)}
+    ];
+    try {
+      const ret = await olaWallet.call(abi, "getProposal(hash)", contract, params);
+      console.log("call result", ret);
+    } catch (error) {
+      console.log("error:", error);
+    }
+}
+
 const account = ref('')
 
-const connect = async () => {
-  // @note: test #1
-  await loadCryptoWasm('/mini-goldilocks-web_bg.wasm')
-  await loadAbiWasm('/ola-lang-abi-web_bg.wasm')
-
-  const wallet = new ethers.BrowserProvider(window.ethereum)
-  account.value = (await wallet.send('eth_requestAccounts', []))[0]
-  const signer = await wallet.getSigner()
-  const olaWallet = await OlaWallet.fromETHSignature(signer)
-  olaWallet.connect("https://pre-alpha-api.olavm.com:443", 1027)
-  console.log("pubkey: ", olaWallet.signer.publicKey);
-  console.log("ola address: ", olaWallet.address)
-
-  // try {
-  //   const setKeyHash = await olaWallet.setPubKey();
-  //   console.log("setKeyHash: ", setKeyHash);
-  // } catch (error) {
-  //   console.log("error: ", error);
-  // }
-  
-
-  // const contracAddress = "0x6b2bce884dbab3b4a1ef0c7adc039a4ce93c4e291318218c9280f06bed052662";
-  // const setAbi = [
-  //   { name: "set", type: "function", inputs: [{ name: "d", type: "u32" }], outputs: [] },
-  // ];
-  // const params = [{ U32: 5789 }];
-
-  // const txHash = await olaWallet.invoke(setAbi, "set(u32)", contracAddress, params);
-  // console.log("invoke txHash", txHash);
-
-  // const getCallerAbi = [{"name":"getCaller","type":"function","inputs":[],"outputs":[{"name":"","type":"address"}]}];
-
-  // let result = await olaWallet.call<string>(getCallerAbi, "getCaller()", contracAddress, []);
-  // console.log("result: ", result);
-  // const abi = [{
-  //   "name": "getPubkey",
-  //   "type": "function",
-  //   "inputs": [
-  //     {
-  //       "name": "_address",
-  //       "type": "address"
-  //     }
-  //   ],
-  //   "outputs": [
-  //     {
-  //       "name": "",
-  //       "type": "fields"
-  //     }
-  //   ]
-  // }];
-  // const aa = "0x0000000000000000000000000000000000000000000000000000000000008006";
-  // const params = [
-  //   {Address: Array.from(OlaAddress.toBigintArray(olaWallet.address))}
-  // ];
-  // let result = await olaWallet.call<string>(abi, "getPubkey(address)", aa, params);
-  // console.log("result: ", result);
-
-
-  const proposalAbi = [
+const proposalAbi = [
     {
       "name": "createProposal",
       "type": "function",
@@ -181,40 +208,32 @@ const connect = async () => {
         }
       ]
     }
-  ];
+];
 
-  const contracAddress = "0x1fa12c6c27a44cbe8996a030d218b3082e6300b259576b6c91c7cc4fdd2e6bf9";
+const proposalAddress = "0x1fa12c6c27a44cbe8996a030d218b3082e6300b259576b6c91c7cc4fdd2e6bf9";
 
-  // const _contentHash = new Uint8Array(32);
-  // _contentHash.fill(1);
-  // const _deadline = 8234567890;
-  // // const _deadline = 1707180476;
-  // const _votingType = 0;
-  // const _proposalType = 1;
-  
-  // const params = [
-  //   {Hash: Array.from(_contentHash)},
-  //   {U32: _deadline},
-  //   {U32: _votingType},
-  //   {U32: _proposalType}
-  // ];
-  // console.log("params: ", params);
-  // try {
-  //   const txHash = await olaWallet.invoke(abi, "createProposal(hash,u32,u32,u32)", contracAddress, params);
-  //   console.log("invoke txHash", txHash);
-  // } catch (error) {
-  //   console.log("error:", error);
-  // }
+const connect = async () => {
+  // @note: test #1
+  await loadCryptoWasm('/mini-goldilocks-web_bg.wasm')
+  await loadAbiWasm('/ola-lang-abi-web_bg.wasm')
 
-  const params = [
-      {Address: Array.from(OlaAddress.toBigintArray(olaWallet.address))}
-    ];
-    try {
-      const ret = await olaWallet.call(proposalAbi, "getProposalsByOwner(address)", contracAddress, params);
-      console.log("call result", ret);
-    } catch (error) {
-      console.log("error:", error);
-    }
+  const wallet = new ethers.BrowserProvider(window.ethereum)
+  account.value = (await wallet.send('eth_requestAccounts', []))[0]
+  const signer = await wallet.getSigner()
+  const olaWallet = await OlaWallet.fromETHSignature(signer)
+  olaWallet.connect("https://pre-alpha-api.olavm.com:443", 1027)
+  console.log("pubkey: ", olaWallet.signer.publicKey);
+  console.log("ola address: ", olaWallet.address)
+
+  // Register related code.
+  // await setPubkey(olaWallet);
+  // await getPubkey(olaWallet);
+
+
+  // Proposal related code.
+  // await createProposal(olaWallet, proposalAbi, proposalAddress);
+  // await getProposalsByOwner(olaWallet, proposalAbi, proposalAddress);
+  // await getProposal(olaWallet, proposalAbi, proposalAddress);
 }
 
 onMounted(() => {})
