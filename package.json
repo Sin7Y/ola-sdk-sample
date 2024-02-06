@@ -28,9 +28,9 @@
   "dependencies": {
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@pinia/nuxt": "^0.5.1",
-    "@sin7y/ola-abi-wasm": "^0.0.3",
+    "@sin7y/ola-abi-wasm": "^0.0.4",
     "@sin7y/ola-crypto": "^0.0.4",
-    "@sin7y/ola-js-sdk": "^0.0.10",
+    "@sin7y/ola-js-sdk": "^0.0.13",
     "axios": "^1.6.3",
     "bignumber.js": "^9.1.2",
     "dayjs": "^1.11.10",
